@@ -3,14 +3,14 @@ Multivariable Linear Regression Project
 Assignment 6 Part 3
 
 Group Members:
-- 
+- Max Carmona
 - 
 - 
 - 
 
-Dataset: [Name of your dataset]
-Predicting: [What you're predicting]
-Features: [List your features]
+Dataset: Micheal Jordan Career Statistics
+Predicting: Points Per Game (PPG)
+Features: Minutes, rebounds, Assists, Steals, Field Goal %
 """
 
 import pandas as pd
@@ -21,7 +21,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
 
 # TODO: Update this with your actual filename
-DATA_FILE = 'your_data.csv'
+DATA_FILE = 'mj_stats.csv'
 
 def load_and_explore_data(filename):
     """
@@ -37,10 +37,29 @@ def load_and_explore_data(filename):
     print("=" * 70)
     print("LOADING AND EXPLORING DATA")
     print("=" * 70)
+
+# Load the CSV file
+    data = pd.read_csv(filename)
     
-    # Your code here
+    # Print first 5 rows
+    print("\nFirst 5 seasons:")
+    print(data.head())
     
-    pass
+    # Print the shape
+    print(f"\nDataset shape: {data.shape[0]} rows, {data.shape[1]} columns")
+    
+    # Print summary statistics
+    print("\nBasic statistics:")
+    print(data.describe())
+    
+    # Check for missing values
+    print("\nMissing values:")
+    print(data.isnull().sum())
+    
+    # Print column names
+    print(f"\nColumn names: {list(data.columns)}")
+    
+    return data
 
 
 def visualize_data(data):
@@ -61,10 +80,52 @@ def visualize_data(data):
     print("VISUALIZING RELATIONSHIPS")
     print("=" * 70)
     
-    # Your code here
-    # Hint: Use subplots like in Part 2!
+    # Create figure with 2x3 subplots
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    fig.suptitle('MJ Features vs Points Per Game', fontsize=16, fontweight='bold')
     
-    pass
+    # Plot 1: Minutes vs Points
+    axes[0, 0].scatter(data['Minutes'], data['Points'], color='red', alpha=0.6)
+    axes[0, 0].set_xlabel('Minutes Per Game')
+    axes[0, 0].set_ylabel('Points Per Game')
+    axes[0, 0].set_title('Minutes vs Points')
+    axes[0, 0].grid(True, alpha=0.3)
+    
+    # Plot 2: Rebounds vs Points
+    axes[0, 1].scatter(data['Rebounds'], data['Points'], color='blue', alpha=0.6)
+    axes[0, 1].set_xlabel('Rebounds Per Game')
+    axes[0, 1].set_ylabel('Points Per Game')
+    axes[0, 1].set_title('Rebounds vs Points')
+    axes[0, 1].grid(True, alpha=0.3)
+    
+    # Plot 3: Assists vs Points
+    axes[0, 2].scatter(data['Assists'], data['Points'], color='green', alpha=0.6)
+    axes[0, 2].set_xlabel('Assists Per Game')
+    axes[0, 2].set_ylabel('Points Per Game')
+    axes[0, 2].set_title('Assists vs Points')
+    axes[0, 2].grid(True, alpha=0.3)
+    
+    # Plot 4: Steals vs Points
+    axes[1, 0].scatter(data['Steals'], data['Points'], color='orange', alpha=0.6)
+    axes[1, 0].set_xlabel('Steals Per Game')
+    axes[1, 0].set_ylabel('Points Per Game')
+    axes[1, 0].set_title('Steals vs Points')
+    axes[1, 0].grid(True, alpha=0.3)
+    
+    # Plot 5: FG% vs Points
+    axes[1, 1].scatter(data['FG_Percent'], data['Points'], color='purple', alpha=0.6)
+    axes[1, 1].set_xlabel('Field Goal %')
+    axes[1, 1].set_ylabel('Points Per Game')
+    axes[1, 1].set_title('FG% vs Points')
+    axes[1, 1].grid(True, alpha=0.3)
+    
+    # Remove empty subplot
+    fig.delaxes(axes[1, 2])
+    
+    plt.tight_layout()
+    plt.savefig('mj_feature_plots.png', dpi=300, bbox_inches='tight')
+    print("\nFeature plots saved as 'mj_feature_plots.png'")
+    plt.show()
 
 
 def prepare_and_split_data(data):
