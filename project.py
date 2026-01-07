@@ -25,7 +25,7 @@ DATA_FILE = 'mj_stats.csv'
 
 def load_and_explore_data(filename):
     """
-    Load your dataset and print basic information
+    Load your dataset and print basic infor
     
     TODO:
     - Load the CSV file
@@ -38,12 +38,12 @@ def load_and_explore_data(filename):
     print("LOADING AND EXPLORING DATA")
     print("=" * 70)
 
-# Load the CSV file
+    # Load the CSV file
     data = pd.read_csv(filename)
     
-    # Print first 5 rows
-    print("\nFirst 5 seasons:")
-    print(data.head())
+    # Print 15 rows
+    print("\nJordan's 15 seasons:")
+    print(data.head(15))
     
     # Print the shape
     print(f"\nDataset shape: {data.shape[0]} rows, {data.shape[1]} columns")
@@ -149,9 +149,26 @@ def prepare_and_split_data(data):
     print("PREPARING AND SPLITTING DATA")
     print("=" * 70)
     
-    # Your code here
+    # Create list of feature columns
+    feature_columns = ['Minutes', 'Rebounds', 'Assists', 'Steals', 'FG_Percent']
     
-    pass
+    # Separate features and target
+    X = data[feature_columns]
+    y = data['Points']
+    
+    # Print shapes
+    print(f"\nFeatures (X) shape: {X.shape}")
+    print(f"Target (y) shape: {y.shape}")
+    print(f"\nFeature columns: {list(X.columns)}")
+    
+    # Split into train/test
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # Print sizes
+    print(f"\nTraining set: {len(X_train)} samples")
+    print(f"Testing set: {len(X_test)} samples")
+    
+    return X_train, X_test, y_train, y_test
 
 
 def train_model(X_train, y_train):
@@ -175,10 +192,45 @@ def train_model(X_train, y_train):
     print("TRAINING MODEL")
     print("=" * 70)
     
-    # Your code here
+     # Create and train model
+    model = LinearRegression()
+    model.fit(X_train, y_train)
     
-    pass
+    # Get feature names
+    feature_names = X_train.columns
+    
+    # Print intercept
+    print(f"\nIntercept: {model.intercept_:.2f}")
+    
+    # Print coefficients
+    print(f"\nCoefficients:")
+    for name, coef in zip(feature_names, model.coef_):
+        print(f"  {name}: {coef:.2f}")
+    
+    # Print full equation
+    print(f"\nEquation:")
+    equation = f"Points = "
+    for i, (name, coef) in enumerate(zip(feature_names, model.coef_)):
+        if i == 0:
+            equation += f"{coef:.2f}*{name}"
+        else:
+            if coef >= 0:
+                equation += f" + {coef:.2f}*{name}"
+            else:
+                equation += f" + ({coef:.2f})*{name}"
+    equation += f" + {model.intercept_:.2f}"
+    print(equation)
+    
+    # Feature importance
+    print(f"\n=== Feature Importance ===")
+    feature_importance = list(zip(feature_names, np.abs(model.coef_)))
+    feature_importance.sort(key=lambda x: x[1], reverse=True)
+    for i, (name, importance) in enumerate(feature_importance, 1):
+        print(f"{i}. {name}: {importance:.2f}")
+    
+    return model
 
+    
 
 def evaluate_model(model, X_test, y_test):
     """
@@ -203,9 +255,37 @@ def evaluate_model(model, X_test, y_test):
     print("EVALUATING MODEL")
     print("=" * 70)
     
-    # Your code here
+    # Make predictions
+    predictions = model.predict(X_test)
     
-    pass
+    # Calculate R² score
+    r2 = r2_score(y_test, predictions)
+    
+    # Calculate MSE and RMSE
+    mse = mean_squared_error(y_test, predictions)
+    rmse = np.sqrt(mse)
+    
+    # Print results
+    print(f"\n=== Model Performance ===")
+    print(f"R² Score: {r2:.4f}")
+    print(f"  → Model explains {r2*100:.2f}% of variation in points")
+    
+    print(f"\nRoot Mean Squared Error: {rmse:.2f}")
+    print(f"  → On average, predictions are off by {rmse:.2f} points")
+    
+    # Comparison table
+    print(f"\n=== Prediction Examples ===")
+    print(f"{'Actual PPG':<15} {'Predicted PPG':<18} {'Error':<12} {'% Error'}")
+    print("-" * 60)
+    
+    for i in range(min(10, len(y_test))):
+        actual = y_test.iloc[i]
+        predicted = predictions[i]
+        error = actual - predicted
+        pct_error = (abs(error)/actual)*100
+        print(f"{actual:>13.2f}   {predicted:>15.2f}   {error:>10.2f}   {pct_error:>6.2f}%")
+    
+    return predictions
 
 
 def make_prediction(model):
@@ -225,11 +305,32 @@ def make_prediction(model):
     print("EXAMPLE PREDICTION")
     print("=" * 70)
     
-    # Your code here
-    # Example: If predicting house price with [sqft, bedrooms, bathrooms]
-    # sample = pd.DataFrame([[2000, 3, 2]], columns=feature_names)
+     # Create sample input (prime MJ stats)
+    print("\nPredicting PPG for a hypothetical season:")
+    sample_minutes = 38.0
+    sample_rebounds = 6.5
+    sample_assists = 6.0
+    sample_steals = 2.5
+    sample_fg = 52.0
     
-    pass
+    # Create DataFrame
+    sample = pd.DataFrame([[sample_minutes, sample_rebounds, sample_assists, sample_steals, sample_fg]], 
+                         columns=feature_names)
+    
+    # Make prediction
+    predicted_points = model.predict(sample)[0]
+    
+    # Print results
+    print(f"\nInput stats:")
+    print(f"  Minutes: {sample_minutes}")
+    print(f"  Rebounds: {sample_rebounds}")
+    print(f"  Assists: {sample_assists}")
+    print(f"  Steals: {sample_steals}")
+    print(f"  FG%: {sample_fg}")
+    
+    print(f"\nPredicted Points Per Game: {predicted_points:.2f}")
+    
+    return predicted_points
 
 
 if __name__ == "__main__":
@@ -247,6 +348,7 @@ if __name__ == "__main__":
     
     # Step 5: Evaluate
     predictions = evaluate_model(model, X_test, y_test)
+
     
     # Step 6: Make a prediction, add features as an argument
     make_prediction(model)
