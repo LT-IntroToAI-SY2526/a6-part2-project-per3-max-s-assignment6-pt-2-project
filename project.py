@@ -125,7 +125,7 @@ def visualize_data(data):
     plt.tight_layout()
     plt.savefig('mj_feature_plots.png', dpi=300, bbox_inches='tight')
     print("\nFeature plots saved as 'mj_feature_plots.png'")
-    plt.show()
+    
 
 
 def prepare_and_split_data(data):
@@ -352,13 +352,11 @@ if __name__ == "__main__":
     
     # Step 6: Make a prediction, add features as an argument
     make_prediction(model)
+
+    plt.show()
     
     print("\n" + "=" * 70)
     print("PROJECT COMPLETE!")
     print("=" * 70)
-    print("\nNext steps:")
-    print("1. Analyze your results")
-    print("2. Try improving your model (add/remove features)")
-    print("3. Create your presentation")
-    print("4. Practice presenting with your group!")
+    
 
